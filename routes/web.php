@@ -6,27 +6,34 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\Vendor\GalleryController;
 use App\Http\Controllers\Vendor\MenuController;
 use App\Http\Controllers\Vendor\ProductController;
 use App\Http\Controllers\Vendor\RestaurantController;
 use App\Http\Controllers\Vendor\VendorController as VendorVendorController;
 use App\Http\Controllers\VendorController;
 
-Route::get('/', function () {
-    return view('welcome');
+
+
+Route::controller(UserController::class)->group(function(){
+    route::get('/', 'index')->name('index');
 });
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    return view('frontend.dashboard.dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::post('/store/profile', [ProfileController::class, 'profileStore'])->name('profile.store');
+    Route::get('/user/logout', [ProfileController::class, 'userLogout'])->name('user.logout');
+    Route::get('/change/password', [ProfileController::class, 'changePassword'])->name('change.password');
+    Route::post('/password/update', [ProfileController::class, 'passwordUpdate'])->name('user.password.update');
 });
 
 require __DIR__.'/auth.php';
+
+// Admin Routes
 
 Route::get('/admin/login', [AdminController::class, 'AdminLogin'])
 ->name('admin.login');
@@ -44,6 +51,8 @@ route::middleware('admin')->group(function() {
     Route::get('/admin/change/password', [AdminController::class, 'AdminChangePassword'])
     ->name('admin.change.password');
 
+    Route::post('/admin/password/update', [AdminController::class, 'AdminUpdatePassword'])
+    ->name('admin.password.update');
 });
 
 Route::post('/admin/login_submit', [AdminController::class, 'AdminLoginSubmit'])
@@ -102,6 +111,32 @@ Route::middleware('vendor')->group(function(){
 
     Route::post('/vendor/profile/store', [VendorController::class, 'VendorProfileStore'])
     ->name('vendor.profile.store');
+
+    Route::get('/change/password', [VendorController::class, 'changePassword'])
+    ->name('vendor.change_password');
+
+    Route::post('/vendor/update/password', [VendorController::class, 'updatePassword'])
+    ->name('vendor.password.update');
+
+
+    // Gallery
+    Route::get('/vendor/all/gallery', [GalleryController::class, 'allGallery'])
+    ->name('all.gallery');
+
+    Route::get('/vendor/add/gallery', [GalleryController::class, 'addGallery'])
+    ->name('add.gallery');
+
+    Route::post('/vendor/gallery/store', [GalleryController::class, 'galleryStore'])
+    ->name('gallery.store');
+
+    Route::get('/edit/gallery/{id}', [GalleryController::class, 'EditGallery'])
+    ->name('edit.gallery');
+
+    Route::post('/update/gallery', [GalleryController::class, 'UpdateGallery'])
+    ->name('gallery.update');
+
+    Route::get('/delete/gallery/{id}', [GalleryController::class, 'DeleteGallery'])
+    ->name('delete.gallery');
 });
 
 

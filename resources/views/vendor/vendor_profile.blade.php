@@ -77,6 +77,28 @@
                                                 <label for="phone" class="form-label">Phone</label>
                                                 <input class="form-control" type="text" name="phone" value="{{ $profileData->phone }}" id="phone">
                                             </div>
+                                            <div class="form-group mb-3">
+                                                <label for="name" class="form-label">City Name</label>
+                                                <select name="city_id" class="form-select">
+                                                    <option selected="" disabled="">Select</option>
+                                                    @foreach ($city as $cit)
+                                                        <option value="{{ $cit->id }}">{{ $cit->city_name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="basicpill-address-input" class="form-label">Vendor Info</label>
+                                                <textarea id="basicpill-address-input" name="vendor_info" class="form-control" rows="2">{{ $profileData->vendor_info }}</textarea>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="cover_photo" class="form-label">Cover Photo</label>
+                                                <input class="form-control" type="file" name="cover_photo" value="{{ $profileData->cover_photo }}" id="cover_image">
+                                            </div>
+                                            <div class="mb-3">
+                                                <img id='showCoverImage' src="{{ (!empty($profileData->cover_photo))?
+                                                url('upload/vendor_images/' .$profileData->cover_photo):
+                                                url('upload/no_image.jpg')}}" alt="" width="310" height="100">
+                                            </div>
                                         </div>
                                     </div>
 
@@ -119,6 +141,18 @@
                             var reader = new FileReader();
                             reader.onload = function(e) {
                                 $('#showImage').attr('src', e.target.result); // Changed 'r' to 'e'
+                            }
+                            reader.readAsDataURL(e.target.files[0]); // 'files[0]' is correct
+                        });
+                    });
+                </script>
+
+                <script type="text/javascript">
+                    $(document).ready(function() {
+                        $('#cover_image').change(function(e) {
+                            var reader = new FileReader();
+                            reader.onload = function(e) {
+                                $('#showCoverImage').attr('src', e.target.result); // Changed 'r' to 'e'
                             }
                             reader.readAsDataURL(e.target.files[0]); // 'files[0]' is correct
                         });

@@ -51,8 +51,8 @@ class CategoryController extends Controller
 
         if($request->file('image')){
             $image = $request->file('image');
-            $manager = new ImageManager(new Driver());
             $name_generate = hexdec(uniqid()).'.'.$image->getClientOriginalExtension();
+            $manager = new ImageManager(new Driver());
             $img = $manager->read($image);
             $img->resize(300, 300)->save(public_path('upload/category/'.$name_generate));
             $save_url = 'upload/category/'.$name_generate;

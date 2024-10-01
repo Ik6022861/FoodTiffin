@@ -80,7 +80,6 @@ class MenuController extends Controller
             );
 
             return redirect()->route('all.menu')->with($notification);
-
         }
     }
 

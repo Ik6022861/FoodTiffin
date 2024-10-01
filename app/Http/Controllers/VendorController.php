@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\websitemail;
+use App\Models\City;
 use App\Models\Vendor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -126,8 +127,9 @@ class VendorController extends Controller
     public function VendorProfile(){
         $id = Auth::guard('vendor')->id();
         $profileData = Vendor::find($id);
+        $city = City::latest()->get();
 
-        return view('vendor.vendor_profile', compact('profileData'));
+        return view('vendor.vendor_profile', compact('profileData', 'city'));
     }
 
     public function VendorProfileStore(Request $request){
@@ -138,6 +140,9 @@ class VendorController extends Controller
         $data->email = $request->email;
         $data->phone = $request->phone;
         $data->address = $request->address;
+        $data->city_id = $request->city_id;
+        $data->vendor_info = $request->vendor_info;
+        $data->cover_photo = $request->cover_photo;
         $oldPhotoPath = $data->photo;
 
         if($request->hasFile('photo')){
@@ -147,6 +152,17 @@ class VendorController extends Controller
             $data->photo = $filename;
 
             if ($oldPhotoPath && $oldPhotoPath !== $filename){
+                $this->deleteOldImage($oldPhotoPath);
+            }
+        }
+
+        if($request->hasFile('cover_photo')){
+            $file2 = $request->file('cover_photo');
+            $filename2 = time().'.'.$file2->getClientOriginalExtension();
+            $file2->move(public_path('upload/vendor_images'), $filename2);
+            $data->cover_photo = $filename2;
+
+            if ($oldPhotoPath && $oldPhotoPath !== $filename2){
                 $this->deleteOldImage($oldPhotoPath);
             }
         }
@@ -164,5 +180,36 @@ class VendorController extends Controller
         if(file_exists($fullPath)){
             unlink($fullPath);
         }
+    }
+
+    public function changePassword(){
+        $id = Auth::guard('vendor')->id();
+        $profileData = Vendor::find($id);
+        return view('vendor.change_password', compact('profileData'));
+    }
+
+    public function updatePassword(Request $request){
+        $vendor = Auth::guard('vendor')->user();
+        $request->validate([
+            'old_password' => 'required',
+            'new_password' => 'required|confirmed',
+        ]);
+        if(!Hash::check($request->old_password, $vendor->password)){
+            $notification = array(
+                'message' => 'Old Password does not match!',
+                'alert-type' => 'error'
+            );
+            return redirect()->back()->with($notification);
+        }
+
+        // update new password
+        Vendor::whereId($vendor->id)->update([
+            'password' => Hash::make($request->new_password)
+        ]);
+        $notification = array(
+            'message' => 'Password updated Successfully!',
+            'alert-type' => 'success'
+        );
+        return redirect()->back()->with($notification);
     }
 }
